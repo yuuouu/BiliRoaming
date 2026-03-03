@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.lsplugin.cmaker)
 }
 
-val appVerCode = jgit.repo()?.commitCount("refs/remotes/origin/master") ?: 0
+val appVerCode = jgit.repo()?.commitCount("refs/remotes/origin/master") ?: 1
 val appVerName: String by rootProject
 
 apksign {
