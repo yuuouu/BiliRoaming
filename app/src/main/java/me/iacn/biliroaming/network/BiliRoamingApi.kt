@@ -5,7 +5,6 @@ import android.app.AndroidAppHelper
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import me.iacn.biliroaming.BiliBiliPackage.Companion.instance
@@ -15,6 +14,7 @@ import me.iacn.biliroaming.hook.BangumiSeasonHook.Companion.lastSeasonInfo
 import me.iacn.biliroaming.utils.*
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -613,19 +613,19 @@ object BiliRoamingApi {
                     var result = ""
 
                     @Suppress("UNUSED")
-                    @JavascriptInterface
-                    fun callback(r: String) {
-                        result = r
+                    fun callback(r: String?) {
+                        result = JSONTokener(r).nextValue().toString()
                         latch.countDown()
                     }
                 }
                 handler.post {
                     val webView = WebView(currentContext, null)
-                    webView.addJavascriptInterface(listener, "listener")
                     webView.webViewClient = object : WebViewClient() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             view?.settings?.javaScriptEnabled = true
-                            view?.loadUrl("javascript:listener.callback(document.documentElement.innerText)")
+                            view?.evaluateJavascript("document.documentElement.innerText") { r ->
+                                listener.callback(r)
+                            }
                         }
                     }
                     webView.loadUrl(
