@@ -86,6 +86,8 @@ message PlayerCoreService {
   optional Method on_seek_complete = 4;
   optional Class seek_complete_listener = 5;
   reserved 6, 7, 8;
+  optional Method get_current_position = 9;
+  optional Method on_video_progress_update = 10;
 }
 
 message PcsFacade {

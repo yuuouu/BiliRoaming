@@ -311,4 +311,6 @@
     <string name="purify_story_video_ad_title">净化竖屏模式广告/推广</string>
     <string name="purify_story_video_ad_summary">有了这个，连第一关都看不到了😭</string>
     <string name="long_press_speed">长按播放速度设置</string>
+    <string name="enable_sponsorblock_title">开启自动跳过恰饭片段 (SponsorBlock)</string>
+    <string name="enable_sponsorblock_summary">自动跳过视频中的恰饭广告片段</string>
 </resources>

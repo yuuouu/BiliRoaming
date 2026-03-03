@@ -267,6 +267,10 @@ class BiliBiliPackage constructor(private val mClassLoader: ClassLoader, mContex
 
     fun getPlaybackSpeed() = mHookInfo.playerCoreService.getPlaybackSpeed.orNull
 
+    fun getCurrentPosition() = mHookInfo.playerCoreService.getCurrentPosition.orNull
+
+    fun onVideoProgressUpdate() = mHookInfo.playerCoreService.onVideoProgressUpdate.orNull
+
     fun urlField() = mHookInfo.okHttp.request.url.orNull
 
     fun gsonToJson() = mHookInfo.gsonHelper.toJson.orNull
@@ -1321,6 +1325,48 @@ class BiliBiliPackage constructor(private val mClassLoader: ClassLoader, mContex
                     ).asSequence().firstNotNullOfOrNull {
                         dexHelper.decodeMethodIndex(it)
                     }?.name ?: return@method
+                }
+
+                val getCurrentPositionMethod = dexHelper.findMethodUsingString(
+                    "[player]getCurrentPosition",
+                    true,
+                    -1,
+                    -1,
+                    null,
+                    dexHelper.encodeClassIndex(playerCoreServiceClass),
+                    null,
+                    null,
+                    null,
+                    true
+                ).asSequence().firstNotNullOfOrNull {
+                    dexHelper.decodeMethodIndex(it)
+                } ?: playerCoreServiceClass.declaredMethods.find {
+                    (it.name == "getCurrentPosition" || it.name == "I") && it.parameterTypes.isEmpty() && it.returnType == Long::class.javaPrimitiveType
+                }
+
+                if (getCurrentPositionMethod != null) {
+                    getCurrentPosition = method { name = getCurrentPositionMethod.name }
+                }
+
+                val onVideoProgressUpdateMethod = dexHelper.findMethodUsingString(
+                    "onVideoProgressUpdate",
+                    true,
+                    -1,
+                    -1,
+                    null,
+                    -1,
+                    null,
+                    null,
+                    null,
+                    false
+                ).asSequence().firstNotNullOfOrNull {
+                    dexHelper.decodeMethodIndex(it)
+                } ?: playerCoreServiceClass.declaredMethods.find {
+                    it.name == "onVideoProgressUpdate"
+                }
+
+                if (onVideoProgressUpdateMethod != null) {
+                    onVideoProgressUpdate = method { name = onVideoProgressUpdateMethod.name }
                 }
             }
             val playSpeedManagerClass = ("com.bilibili.player.tangram.basic.PlaySpeedManagerImpl" from classloader) ?: run {
