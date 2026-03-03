@@ -290,6 +290,11 @@
             android:defaultValue="300"
             android:key="long_press_speed"
             android:title="@string/long_press_speed" />
+
+        <SwitchPreference
+            android:key="enable_sponsorblock"
+            android:summary="@string/enable_sponsorblock_summary"
+            android:title="@string/enable_sponsorblock_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_backup">
         <Preference

@@ -186,6 +186,40 @@ object BiliRoamingApi {
     }
 
     @JvmStatic
+    fun getSponsorBlockSegments(bvid: String?, cid: String?): List<Pair<Float, Float>> {
+        if (bvid.isNullOrBlank()) return emptyList()
+        val segments = mutableListOf<Pair<Float, Float>>()
+        try {
+            // Use Bilibili Sponsorblock API format with categories array and actionType filtering
+            val categories = "[\"sponsor\",\"intro\",\"outro\",\"interaction\",\"selfpromo\",\"music_offtopic\"]"
+            val url = Uri.Builder().scheme("https")
+                .encodedAuthority("sponsor.ajay.app")
+                .encodedPath("/api/skipSegments")
+                .appendQueryParameter("videoID", "bili-$bvid")
+                .appendQueryParameter("categories", categories)
+                .toString()
+
+            val response = getContent(url) ?: return segments
+            val jsonArray = JSONArray(response)
+            for (i in 0 until jsonArray.length()) {
+                val item = jsonArray.optJSONObject(i) ?: continue
+                // Only handle skip actionType
+                if (item.optString("actionType") != "skip") continue
+
+                val segmentArray = item.optJSONArray("segment") ?: continue
+                if (segmentArray.length() >= 2) {
+                    val start = segmentArray.optDouble(0).toFloat()
+                    val end = segmentArray.optDouble(1).toFloat()
+                    segments.add(Pair(start, end))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("SponsorBlock fetch error: $e")
+        }
+        return segments
+    }
+
+    @JvmStatic
     fun getAreaSearchBangumi(query: Map<String, String>, area: String, type: String): String? {
         if (area == "th") {
             return getThailandSearchBangumi(query, type)
