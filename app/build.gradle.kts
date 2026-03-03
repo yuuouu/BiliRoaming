@@ -67,11 +67,21 @@ android {
         versionName = appVerName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("open_release.jks")
+            storePassword = "yuuouu"
+            keyAlias = "yuu"
+            keyPassword = "yuuouu"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
