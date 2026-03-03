@@ -22,13 +22,13 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         migrateHomeFilterPrefsIfNeeded()
         sPrefs.getStringSet("home_filter_keywords_title", null).orEmpty()
     }
-    private val kwdFilterTitleRegexes by lazy { kwdFilterTitleList.map { it.toRegex() } }
+    private val kwdFilterTitleCombinedRegex by lazy { kwdFilterTitleList.toCombinedRegex() }
     private val kwdFilterTitleRegexMode = sPrefs.getBoolean("home_filter_title_regex_mode", false)
     private val kwdFilterReasonList by lazy {
         migrateHomeFilterPrefsIfNeeded()
         sPrefs.getStringSet("home_filter_keywords_reason", null).orEmpty()
     }
-    private val kwdFilterReasonRegexes by lazy { kwdFilterReasonList.map { it.toRegex() } }
+    private val kwdFilterReasonCombinedRegex by lazy { kwdFilterReasonList.toCombinedRegex() }
     private val kwdFilterReasonRegexMode = sPrefs.getBoolean("home_filter_reason_regex_mode", false)
     private val kwdFilterUidList by lazy {
         migrateHomeFilterPrefsIfNeeded()
@@ -39,7 +39,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         migrateHomeFilterPrefsIfNeeded()
         sPrefs.getStringSet("home_filter_keywords_up", null).orEmpty()
     }
-    private val kwdFilterUpnameRegexes by lazy { kwdFilterUpnameList.map { it.toRegex() } }
+    private val kwdFilterUpnameCombinedRegex by lazy { kwdFilterUpnameList.toCombinedRegex() }
     private val kwdFilterUpnameRegexMode = sPrefs.getBoolean("home_filter_up_regex_mode", false)
     private val kwdFilterRnameList by lazy {
         migrateHomeFilterPrefsIfNeeded()
@@ -151,7 +151,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (kwdFilterTitleList.isNotEmpty()) {
             val title = obj.getObjectAs<String?>("title").orEmpty()
             if (kwdFilterTitleRegexMode && title.isNotEmpty()) {
-                if (kwdFilterTitleRegexes.any { title.contains(it) })
+                if (kwdFilterTitleCombinedRegex?.containsMatchIn(title) == true)
                     return true
             } else if (title.isNotEmpty()) {
                 if (kwdFilterTitleList.any { title.contains(it) })
@@ -174,7 +174,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 obj.getObjectAsHelperOrNull("args")?.getObjectAs<String?>("up_name").orEmpty()
             }
             if (kwdFilterUpnameRegexMode && upname.isNotEmpty()) {
-                if (kwdFilterUpnameRegexes.any { upname.contains(it) })
+                if (kwdFilterUpnameCombinedRegex?.containsMatchIn(upname) == true)
                     return true
             } else if (upname.isNotEmpty()) {
                 if (kwdFilterUpnameList.any { upname.contains(it) })
@@ -204,7 +204,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 getObjectAsHelperOrNull("rcmd_reason")?.getObjectAs<String?>("text").orEmpty()
             }.orEmpty()
             if (kwdFilterReasonRegexMode && reason.isNotEmpty()) {
-                if (kwdFilterReasonRegexes.any { reason.contains(it) })
+                if (kwdFilterReasonCombinedRegex?.containsMatchIn(reason) == true)
                     return true
             } else if (reason.isNotEmpty()) {
                 if (kwdFilterReasonList.any { reason.contains(it) })
@@ -222,7 +222,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 if (kwdFilterTitleList.isNotEmpty()) {
                     val title = basicInfo.callMethodAs<String>("getTitle")
                     if (kwdFilterTitleRegexMode && title.isNotEmpty()) {
-                        if (kwdFilterTitleRegexes.any { title.contains(it) })
+                        if (kwdFilterTitleCombinedRegex?.containsMatchIn(title) == true)
                             return true
                     } else if (title.isNotEmpty()) {
                         if (kwdFilterTitleList.any { title.contains(it) })
@@ -242,7 +242,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                     if (kwdFilterUpnameList.isNotEmpty()) {
                         val upName = author.callMethodAs<String>("getTitle")
                         if (kwdFilterUpnameRegexMode && upName.isNotEmpty()) {
-                            if (kwdFilterUpnameRegexes.any { upName.contains(it) })
+                            if (kwdFilterUpnameCombinedRegex?.containsMatchIn(upName) == true)
                                 return true
                         } else if (upName.isNotEmpty()) {
                             if (kwdFilterUpnameList.any { upName.contains(it) })
@@ -377,7 +377,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (kwdFilterTitleList.isNotEmpty()) {
             val title = item.callMethodAs<String>("getTitle")
             if (kwdFilterTitleRegexMode && title.isNotEmpty()) {
-                if (kwdFilterTitleRegexes.any { title.contains(it) })
+                if (kwdFilterTitleCombinedRegex?.containsMatchIn(title) == true)
                     return true
             } else if (title.isNotEmpty()) {
                 if (kwdFilterTitleList.any { title.contains(it) })
@@ -394,7 +394,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
             val upname = item.callMethod("getAuthor")
                 ?.callMethodAs<String>("getName").orEmpty()
             if (kwdFilterUpnameRegexMode && upname.isNotEmpty()) {
-                if (kwdFilterUpnameRegexes.any { upname.contains(it) })
+                if (kwdFilterUpnameCombinedRegex?.containsMatchIn(upname) == true)
                     return true
             } else if (upname.isNotEmpty()) {
                 if (kwdFilterUpnameList.any { upname.contains(it) })
@@ -405,7 +405,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
             val reason = item.callMethod("getRcmdReasonStyle")
                 ?.callMethodAs<String>("getText").orEmpty()
             if (kwdFilterReasonRegexMode && reason.isNotEmpty()) {
-                if (kwdFilterReasonRegexes.any { reason.contains(it) })
+                if (kwdFilterReasonCombinedRegex?.containsMatchIn(reason) == true)
                     return true
             } else if (reason.isNotEmpty()) {
                 if (kwdFilterReasonList.any { reason.contains(it) })
@@ -458,7 +458,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (kwdFilterTitleList.isNotEmpty()) {
             val title = base.callMethodAs<String>("getTitle")
             if (kwdFilterTitleRegexMode && title.isNotEmpty()) {
-                if (kwdFilterTitleRegexes.any { title.contains(it) })
+                if (kwdFilterTitleCombinedRegex?.containsMatchIn(title) == true)
                     return true
             } else if (title.isNotEmpty()) {
                 if (kwdFilterTitleList.any { title.contains(it) }) {
@@ -476,7 +476,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (kwdFilterUpnameList.isNotEmpty()) {
             val upname = obj.callMethodAs<String>("getRightDesc1")
             if (kwdFilterUpnameRegexMode && upname.isNotEmpty()) {
-                if (kwdFilterUpnameRegexes.any { upname.contains(it) })
+                if (kwdFilterUpnameCombinedRegex?.containsMatchIn(upname) == true)
                     return true
             } else if (upname.isNotEmpty()) {
                 if (kwdFilterUpnameList.any { upname.contains(it) })
@@ -492,7 +492,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 if (reasonText.isNullOrEmpty()) {
                     break
                 }
-                if (kwdFilterReasonRegexMode && kwdFilterReasonRegexes.any { reasonText.contains(it) }) {
+                if (kwdFilterReasonRegexMode && kwdFilterReasonCombinedRegex?.containsMatchIn(reasonText) == true) {
                     return true
                 } else if (kwdFilterReasonList.any { reasonText.contains(it) }) {
                     return true
@@ -598,7 +598,7 @@ class PegasusHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                                 if (kwdFilterReasonList.isNotEmpty()) {
                                     val reason = rcmd.callMethodAs<String>("getText")
                                     if (kwdFilterReasonRegexMode && reason.isNotEmpty()) {
-                                        if (kwdFilterReasonRegexes.any { reason.contains(it) })
+                                        if (kwdFilterReasonCombinedRegex?.containsMatchIn(reason) == true)
                                             shouldFiltered = true
                                             return@let
                                     } else if (reason.isNotEmpty()) {

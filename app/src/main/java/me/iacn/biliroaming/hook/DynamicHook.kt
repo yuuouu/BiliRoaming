@@ -15,7 +15,7 @@ class DynamicHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     private val purifyContents = run {
         sPrefs.getStringSet("customize_dynamic_keyword_content", null).orEmpty()
     }
-    private val purifyContentRegexes by lazy { purifyContents.map { it.toRegex() } }
+    private val purifyContentCombinedRegex by lazy { purifyContents.toCombinedRegex() }
     private val contentRegexMode = sPrefs.getBoolean("dynamic_content_regex_mode", false)
     private val purifyUpNames = run {
         sPrefs.getStringSet("customize_dynamic_keyword_upname", null).orEmpty()
@@ -160,7 +160,7 @@ class DynamicHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         ?.callMethodAs<String>("getText").orEmpty()
                 }
                 if (modulesText.isNotEmpty() && if (contentRegexMode)
-                        purifyContentRegexes.any { modulesText.contains(it) }
+                        purifyContentCombinedRegex?.containsMatchIn(modulesText) == true
                     else purifyContents.any { modulesText.contains(it) }
                 ) {
                     idxList.add(idx)
@@ -175,7 +175,7 @@ class DynamicHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         it.callMethodAs<String>("getOrigText")
                     }
                 if (contentOrig.isNotEmpty() && if (contentRegexMode)
-                        purifyContentRegexes.any { contentOrig.contains(it) }
+                        purifyContentCombinedRegex?.containsMatchIn(contentOrig) == true
                     else purifyContents.any { contentOrig.contains(it) }
                 ) {
                     idxList.add(idx)
@@ -190,7 +190,7 @@ class DynamicHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         it.callMethodAs<String>("getOrigText")
                     }
                 if (content.isNotEmpty() && if (contentRegexMode)
-                        purifyContentRegexes.any { content.contains(it) }
+                        purifyContentCombinedRegex?.containsMatchIn(content) == true
                     else purifyContents.any { content.contains(it) }
                 ) {
                     idxList.add(idx)

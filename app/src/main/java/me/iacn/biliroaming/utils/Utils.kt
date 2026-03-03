@@ -466,3 +466,13 @@ fun Class<*>.findField(filter: (Field) -> Boolean): Field? {
         filter(field)
     } ?: superclass?.findField(filter)
 }
+
+fun Iterable<String>.checkRegex(): Boolean {
+    return runCatching { forEach { java.util.regex.Pattern.compile(it) } }.isSuccess
+}
+
+fun Iterable<String>.toCombinedRegex(): Regex? {
+    val list = this.filter { it.isNotEmpty() }
+    if (list.isEmpty()) return null
+    return list.joinToString("|") { "(?:$it)" }.toRegex()
+}

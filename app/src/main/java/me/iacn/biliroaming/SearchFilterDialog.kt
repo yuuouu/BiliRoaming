@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import me.iacn.biliroaming.utils.Log
+import me.iacn.biliroaming.utils.checkRegex
 import me.iacn.biliroaming.utils.dp
 
 class SearchFilterDialog(activity: Activity, prefs: SharedPreferences) :
@@ -55,7 +56,7 @@ class SearchFilterDialog(activity: Activity, prefs: SharedPreferences) :
 
             val contents = contentGroup.getKeywords()
             val contentRegexMode = contentRegexSwitch.isChecked
-            if (contentRegexMode && contents.runCatching { forEach { it.toRegex() } }.isFailure) {
+            if (contentRegexMode && !contents.checkRegex()) {
                 Log.toast(string(R.string.invalid_regex), force = true)
                 return@setPositiveButton
             }
