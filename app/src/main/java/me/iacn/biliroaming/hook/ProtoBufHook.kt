@@ -43,7 +43,7 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     private val searchFilterContents = run {
         sPrefs.getStringSet("search_filter_keyword_content", null).orEmpty()
     }
-    private val searchFilterContentRegexes by lazy { searchFilterContents.map { it.toRegex() } }
+    private val searchFilterContentCombinedRegex by lazy { searchFilterContents.toCombinedRegex() }
     private val searchFilterContentRegexMode = sPrefs.getBoolean("search_filter_content_regex_mode", false)
     private val searchFilterUpNames = run {
         sPrefs.getStringSet("search_filter_keyword_upname", null).orEmpty()
@@ -59,7 +59,7 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     private val commentFilterContents = run {
         sPrefs.getStringSet("comment_filter_keyword_content", null).orEmpty()
     }
-    private val commentFilterContentRegexes by lazy { commentFilterContents.map { it.toRegex() } }
+    private val commentFilterContentCombinedRegex by lazy { commentFilterContents.toCombinedRegex() }
     private val commentFilterContentRegexMode = sPrefs.getBoolean("comment_filter_content_regex_mode", false)
     private val commentFilterAtUpNames = run {
         sPrefs.getStringSet("comment_filter_keyword_at_upname", null).orEmpty()
@@ -288,7 +288,7 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                     if (videoCard.getLongField("mid_") in searchFilterUid) return@filter false
                     if (videoCard.getObjectFieldAs<String>("author_") in searchFilterUpNames) return@filter false
                     if (searchFilterContentRegexMode) {
-                        if (searchFilterContentRegexes.any { it.containsMatchIn(videoCard.getObjectFieldAs<String>("title_")) })
+                        if (searchFilterContentCombinedRegex?.containsMatchIn(videoCard.getObjectFieldAs<String>("title_")) == true)
                             return@filter false
                     } else {
                         if (searchFilterContents.any { videoCard.getObjectFieldAs<String>("title_").contains(it) }) return@filter false
@@ -314,7 +314,7 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 val commentMessage = content.getObjectFieldAs<String>("message_")
 
                 val contentIsToBlock = commentFilterContents.isNotEmpty() && if (commentFilterContentRegexMode) {
-                    commentFilterContentRegexes.any { commentMessage.contains(it) }
+                    commentFilterContentCombinedRegex?.containsMatchIn(commentMessage) == true
                 } else {
                     commentFilterContents.any { commentMessage.contains(it) }
                 }

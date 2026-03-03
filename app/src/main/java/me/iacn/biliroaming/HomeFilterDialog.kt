@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import me.iacn.biliroaming.utils.Log
+import me.iacn.biliroaming.utils.checkRegex
 import me.iacn.biliroaming.utils.dp
 import me.iacn.biliroaming.utils.migrateHomeFilterPrefsIfNeeded
 
@@ -105,19 +106,19 @@ class HomeFilterDialog(activity: Activity, prefs: SharedPreferences) :
 
             val titles = titleGroup.getKeywords()
             val titleRegexMode = titleRegexModeSwitch.isChecked
-            if (titleRegexMode && titles.runCatching { forEach { it.toRegex() } }.isFailure) {
+            if (titleRegexMode && !titles.checkRegex()) {
                 Log.toast(string(R.string.invalid_regex), force = true)
                 return@setPositiveButton
             }
             val reasons = reasonGroup.getKeywords()
             val reasonRegexMode = reasonRegexModeSwitch.isChecked
-            if (reasonRegexMode && reasons.runCatching { forEach { it.toRegex() } }.isFailure) {
+            if (reasonRegexMode && !reasons.checkRegex()) {
                 Log.toast(string(R.string.invalid_regex), force = true)
                 return@setPositiveButton
             }
             val ups = upGroup.getKeywords()
             val upRegexMode = upRegexModeSwitch.isChecked
-            if (upRegexMode && ups.runCatching { forEach { it.toRegex() } }.isFailure) {
+            if (upRegexMode && !ups.checkRegex()) {
                 Log.toast(string(R.string.invalid_regex), force = true)
                 return@setPositiveButton
             }
