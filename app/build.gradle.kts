@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.lsplugin.cmaker)
 }
 
-val appVerCode = jgit.repo()?.commitCount("refs/remotes/origin/master") ?: 0
+val appVerCode = jgit.repo()?.commitCount("refs/remotes/origin/master") ?: 1
 val appVerName: String by rootProject
 
 apksign {
@@ -67,11 +67,21 @@ android {
         versionName = appVerName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("open_release.jks")
+            storePassword = "yuuouu"
+            keyAlias = "yuu"
+            keyPassword = "yuuouu"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
