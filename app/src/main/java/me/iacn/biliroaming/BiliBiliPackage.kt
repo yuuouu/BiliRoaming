@@ -1293,6 +1293,7 @@ class BiliBiliPackage constructor(private val mClassLoader: ClassLoader, mContex
                 val playerCoreServiceClass = seekToMethod.declaringClass
                 seekTo = method { name = seekToMethod.name }
                 class_ = class_ { name = playerCoreServiceClass.name }
+                android.util.Log.d("BiliRoaming", "yuuou: 成功扫描到播放器核心类: ${playerCoreServiceClass.name}")
                 val onSeekCompleteMethod = dexHelper.findMethodUsingString(
                     "[player]seek complete",
                     true,

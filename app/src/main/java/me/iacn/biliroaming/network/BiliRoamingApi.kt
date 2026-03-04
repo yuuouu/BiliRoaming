@@ -185,36 +185,43 @@ object BiliRoamingApi {
         return getContent(uri)
     }
 
+    data class SponsorBlockSegment(
+        val start: Float,
+        val end: Float
+    )
+
     @JvmStatic
-    fun getSponsorBlockSegments(bvid: String?, cid: String?): List<Pair<Float, Float>> {
+    fun getSponsorBlockSegments(bvid: String?, cid: String?): List<SponsorBlockSegment> {
         if (bvid.isNullOrBlank()) return emptyList()
-        val segments = mutableListOf<Pair<Float, Float>>()
+        val segments = mutableListOf<SponsorBlockSegment>()
         try {
-            // Use Bilibili Sponsorblock API format with categories array and actionType filtering
             val categories = "[\"sponsor\",\"intro\",\"outro\",\"interaction\",\"selfpromo\",\"music_offtopic\"]"
             val url = Uri.Builder().scheme("https")
-                .encodedAuthority("sponsor.ajay.app")
+                .encodedAuthority("bsbsb.top")
                 .encodedPath("/api/skipSegments")
                 .appendQueryParameter("videoID", "bili-$bvid")
                 .appendQueryParameter("categories", categories)
+                .build()
                 .toString()
+
+            android.util.Log.d("BiliRoaming", "yuuou: 发起 SponsorBlock 请求, BVID: $bvid, URL: $url")
 
             val response = getContent(url) ?: return segments
             val jsonArray = JSONArray(response)
             for (i in 0 until jsonArray.length()) {
                 val item = jsonArray.optJSONObject(i) ?: continue
-                // Only handle skip actionType
                 if (item.optString("actionType") != "skip") continue
 
                 val segmentArray = item.optJSONArray("segment") ?: continue
                 if (segmentArray.length() >= 2) {
                     val start = segmentArray.optDouble(0).toFloat()
                     val end = segmentArray.optDouble(1).toFloat()
-                    segments.add(Pair(start, end))
+                    segments.add(SponsorBlockSegment(start, end))
                 }
             }
+            android.util.Log.d("BiliRoaming", "yuuou: SponsorBlock 解析成功, BVID: $bvid, 获取到 ${segments.size} 个 skip 区间")
         } catch (e: Exception) {
-            Log.e("SponsorBlock fetch error: $e")
+            android.util.Log.e("BiliRoaming", "yuuou: SponsorBlock 请求失败, BVID: $bvid", e)
         }
         return segments
     }

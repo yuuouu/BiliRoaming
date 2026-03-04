@@ -17,7 +17,7 @@ class SponsorBlockHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     @Volatile
     private var currentCid: Long? = null
     @Volatile
-    private var skipSegments: List<Pair<Float, Float>> = emptyList()
+    private var skipSegments: List<BiliRoamingApi.SponsorBlockSegment> = emptyList()
     @Volatile
     private var lastSeekTarget: Long = -1
 
@@ -84,8 +84,8 @@ class SponsorBlockHook(classLoader: ClassLoader) : BaseHook(classLoader) {
 
                     // Find if we are currently inside any skipped segment
                     for (segment in skipSegments) {
-                        val start = segment.first
-                        val end = segment.second
+                        val start = segment.start
+                        val end = segment.end
 
                         if (currentPosSec >= start && currentPosSec < end) {
                             val targetSeekMs = (end * 1000).toLong()
@@ -93,6 +93,7 @@ class SponsorBlockHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             // Prevent infinite seeking loops
                             if (lastSeekTarget != targetSeekMs) {
                                 lastSeekTarget = targetSeekMs
+                                android.util.Log.d("BiliRoaming", "yuuou: 触发恰饭跳过！当前进度 $currentPosSec, 目标跳转至 $end")
                                 playerCoreService.callMethodOrNull(seekToMethod, targetSeekMs)
 
                                 Handler(Looper.getMainLooper()).post {
